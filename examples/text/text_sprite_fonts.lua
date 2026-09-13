@@ -1,72 +1,58 @@
 -------------------------------------------------------------------------------------------
 --
---  raylib [text] example - SpriteFont loading and usage
+--  raylib [text] example - sprite fonts
 --
---  This example has been created using raylib 1.6 (www.raylib.com)
---  raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+--  This example has been created using raylib 6.0 (www.raylib.com)
 --
---  Copyright (c) 2014-2016 Ramon Santamaria (@raysan5)
+--  Copyright (c) 2014-2026 Ramon Santamaria (@raysan5)
 --
 -------------------------------------------------------------------------------------------
 
--- Initialization
--------------------------------------------------------------------------------------------
-local screenWidth = 800
-local screenHeight = 450
-
-InitWindow(screenWidth, screenHeight, "raylib [text] example - sprite fonts usage")
-
-local msg1 = "THIS IS A custom SPRITE FONT..."
-local msg2 = "...and this is ANOTHER CUSTOM font..."
-local msg3 = "...and a THIRD one! GREAT! :D"
-
--- NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
-local font1 = LoadSpriteFont("resources/custom_mecha.png")          -- SpriteFont loading
-local font2 = LoadSpriteFont("resources/custom_alagard.png")        -- SpriteFont loading
-local font3 = LoadSpriteFont("resources/custom_jupiter_crash.png")  -- SpriteFont loading
-
-local fontPosition1 = Vector2(0, 0)
-local fontPosition2 = Vector2(0, 0)
-local fontPosition3 = Vector2(0, 0)
-
-fontPosition1.x = screenWidth/2 - MeasureTextEx(font1, msg1, font1.baseSize, -3).x/2
-fontPosition1.y = screenHeight/2 - font1.baseSize/2 - 80
-
-fontPosition2.x = screenWidth/2 - MeasureTextEx(font2, msg2, font2.baseSize, -2).x/2
-fontPosition2.y = screenHeight/2 - font2.baseSize/2 - 10
-
-fontPosition3.x = screenWidth/2 - MeasureTextEx(font3, msg3, font3.baseSize, 2).x/2
-fontPosition3.y = screenHeight/2 - font3.baseSize/2 + 50
-
-SetTargetFPS(60)            -- Set target frames-per-second
--------------------------------------------------------------------------------------------
-
--- Main game loop
-while not WindowShouldClose() do            -- Detect window close button or ESC key
-    -- Update
-    ---------------------------------------------------------------------------------------
-    -- TODO: Update variables here...
-    ---------------------------------------------------------------------------------------
-
-    -- Draw
-    ---------------------------------------------------------------------------------------
-    BeginDrawing()
-
-        ClearBackground(RAYWHITE)
-
-        DrawTextEx(font1, msg1, fontPosition1, font1.baseSize, -3, WHITE)
-        DrawTextEx(font2, msg2, fontPosition2, font2.baseSize, -2, WHITE)
-        DrawTextEx(font3, msg3, fontPosition3, font3.baseSize, 2, WHITE)
-
-    EndDrawing()
-    ---------------------------------------------------------------------------------------
+local MAX_FONTS = 8
+local screenWidth, screenHeight = 800, 450
+InitWindow(screenWidth, screenHeight, "raylib [text] example - sprite fonts")
+local fonts = {
+    LoadFont("resources/sprite_fonts/alagard.png"),
+    LoadFont("resources/sprite_fonts/pixelplay.png"),
+    LoadFont("resources/sprite_fonts/mecha.png"),
+    LoadFont("resources/sprite_fonts/setback.png"),
+    LoadFont("resources/sprite_fonts/romulus.png"),
+    LoadFont("resources/sprite_fonts/pixantiqua.png"),
+    LoadFont("resources/sprite_fonts/alpha_beta.png"),
+    LoadFont("resources/sprite_fonts/jupiter_crash.png"),
+}
+local messages = {
+    "ALAGARD FONT designed by Hewett Tsoi",
+    "PIXELPLAY FONT designed by Aleksander Shevchuk",
+    "MECHA FONT designed by Captain Falcon",
+    "SETBACK FONT designed by Brian Kent (AEnigma)",
+    "ROMULUS FONT designed by Hewett Tsoi",
+    "PIXANTIQUA FONT designed by Gerhard Grossmann",
+    "ALPHA_BETA FONT designed by Brian Kent (AEnigma)",
+    "JUPITER_CRASH FONT designed by Brian Kent (AEnigma)",
+}
+local spacings = { 2, 4, 8, 4, 3, 4, 4, 1 }
+local colors = { MAROON, ORANGE, DARKGREEN, DARKBLUE, DARKPURPLE, LIME, GOLD, RED }
+local positions = {}
+for i = 1, MAX_FONTS do
+    positions[i] = Vector2(
+        screenWidth/2 - MeasureTextEx(fonts[i], messages[i], fonts[i].baseSize*2.0, spacings[i]).x/2,
+        60 + fonts[i].baseSize + 45*(i - 1))
 end
+positions[4].y = positions[4].y + 8
+positions[5].y = positions[5].y + 2
+positions[8].y = positions[8].y - 8
+SetTargetFPS(60)
 
--- De-Initialization
--------------------------------------------------------------------------------------------
-UnloadSpriteFont(font1)      -- SpriteFont unloading
-UnloadSpriteFont(font2)      -- SpriteFont unloading
-UnloadSpriteFont(font3)      -- SpriteFont unloading
-
-CloseWindow()                -- Close window and OpenGL context
--------------------------------------------------------------------------------------------
+while not WindowShouldClose() do
+    BeginDrawing()
+        ClearBackground(RAYWHITE)
+        DrawText("free sprite fonts included with raylib", 220, 20, 20, DARKGRAY)
+        DrawLine(220, 50, 600, 50, DARKGRAY)
+        for i = 1, MAX_FONTS do
+            DrawTextEx(fonts[i], messages[i], positions[i], fonts[i].baseSize*2.0, spacings[i], colors[i])
+        end
+    EndDrawing()
+end
+for i = 1, MAX_FONTS do UnloadFont(fonts[i]) end
+CloseWindow()
