@@ -22,22 +22,28 @@
 #define LuaPush_string(L, value)        lua_pushstring(L, (value) ? (value) : "")
 #define LuaPush_long(L, value)          lua_pushinteger(L, (lua_Integer)(value))
 
-#define LuaGetArgument_int(L, i)        (int)luaL_checkinteger(L, i)
-#define LuaGetArgument_unsigned(L, i)   (unsigned int)luaL_checkinteger(L, i)
-#define LuaGetArgument_unsigned_int(L, i) (unsigned int)luaL_checkinteger(L, i)
+#define LuaGetArgument_int(L, i)        (int)luaL_checknumber(L, i)
+#define LuaGetArgument_unsigned(L, i)   (unsigned int)luaL_checknumber(L, i)
+#define LuaGetArgument_unsigned_int(L, i) (unsigned int)luaL_checknumber(L, i)
 #define LuaGetArgument_float(L, i)      (float)luaL_checknumber(L, i)
 #define LuaGetArgument_double(L, i)     (double)luaL_checknumber(L, i)
 #define LuaGetArgument_bool(L, i)       lua_toboolean(L, i)
 #define LuaGetArgument_string(L, i)     luaL_checkstring(L, i)
-#define LuaGetArgument_long(L, i)       (long)luaL_checkinteger(L, i)
-#define LuaGetArgument_char(L, i)       (char)luaL_checkinteger(L, i)
-#define LuaGetArgument_unsigned_char(L, i) (unsigned char)luaL_checkinteger(L, i)
+#define LuaGetArgument_long(L, i)       (long)luaL_checknumber(L, i)
+#define LuaGetArgument_char(L, i)       (char)luaL_checknumber(L, i)
+#define LuaGetArgument_unsigned_char(L, i) (unsigned char)luaL_checknumber(L, i)
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
 //----------------------------------------------------------------------------------
 static lua_State *mainLuaState = 0;
 static lua_State *L = 0;
+
+static int LuaOptInt(lua_State *L, int idx, int def)
+{
+    if (lua_isnoneornil(L, idx)) return def;
+    return (int)luaL_checknumber(L, idx);
+}
 
 //----------------------------------------------------------------------------------
 // Module specific Functions Declaration
@@ -352,10 +358,10 @@ static Color LuaGetArgument_Color(lua_State *L, int index)
     Color result = { 0 };
     index = lua_absindex(L, index);
     luaL_argcheck(L, lua_istable(L, index), index, "Expected Color");
-    lua_getfield(L, index, "r"); result.r = (unsigned char)luaL_checkinteger(L, -1);
-    lua_getfield(L, index, "g"); result.g = (unsigned char)luaL_checkinteger(L, -1);
-    lua_getfield(L, index, "b"); result.b = (unsigned char)luaL_checkinteger(L, -1);
-    lua_getfield(L, index, "a"); result.a = (unsigned char)luaL_checkinteger(L, -1);
+    lua_getfield(L, index, "r"); result.r = (unsigned char)luaL_checknumber(L, -1);
+    lua_getfield(L, index, "g"); result.g = (unsigned char)luaL_checknumber(L, -1);
+    lua_getfield(L, index, "b"); result.b = (unsigned char)luaL_checknumber(L, -1);
+    lua_getfield(L, index, "a"); result.a = (unsigned char)luaL_checknumber(L, -1);
     lua_pop(L, 4);
     return result;
 }
@@ -383,7 +389,7 @@ static Camera LuaGetArgument_Camera(lua_State *L, int index)
     lua_getfield(L, index, "up"); result.up = LuaGetArgument_Vector3(L, -1); lua_pop(L, 1);
     lua_getfield(L, index, "fovy"); result.fovy = (float)luaL_checknumber(L, -1); lua_pop(L, 1);
     lua_getfield(L, index, "projection");
-    if (lua_isnumber(L, -1)) result.projection = (int)lua_tointeger(L, -1);
+    if (lua_isnumber(L, -1)) result.projection = (int)lua_tonumber(L, -1);
     else result.projection = CAMERA_PERSPECTIVE;
     lua_pop(L, 1);
     return result;
@@ -449,11 +455,11 @@ static NPatchInfo LuaGetArgument_NPatchInfo(lua_State *L, int index)
     index = lua_absindex(L, index);
     luaL_argcheck(L, lua_istable(L, index), index, "Expected NPatchInfo");
     lua_getfield(L, index, "source"); result.source = LuaGetArgument_Rectangle(L, -1); lua_pop(L, 1);
-    lua_getfield(L, index, "left"); result.left = (int)luaL_checkinteger(L, -1); lua_pop(L, 1);
-    lua_getfield(L, index, "top"); result.top = (int)luaL_checkinteger(L, -1); lua_pop(L, 1);
-    lua_getfield(L, index, "right"); result.right = (int)luaL_checkinteger(L, -1); lua_pop(L, 1);
-    lua_getfield(L, index, "bottom"); result.bottom = (int)luaL_checkinteger(L, -1); lua_pop(L, 1);
-    lua_getfield(L, index, "layout"); result.layout = (int)luaL_checkinteger(L, -1); lua_pop(L, 1);
+    lua_getfield(L, index, "left"); result.left = (int)luaL_checknumber(L, -1); lua_pop(L, 1);
+    lua_getfield(L, index, "top"); result.top = (int)luaL_checknumber(L, -1); lua_pop(L, 1);
+    lua_getfield(L, index, "right"); result.right = (int)luaL_checknumber(L, -1); lua_pop(L, 1);
+    lua_getfield(L, index, "bottom"); result.bottom = (int)luaL_checknumber(L, -1); lua_pop(L, 1);
+    lua_getfield(L, index, "layout"); result.layout = (int)luaL_checknumber(L, -1); lua_pop(L, 1);
     return result;
 }
 
@@ -473,8 +479,8 @@ static VrDeviceInfo LuaGetArgument_VrDeviceInfo(lua_State *L, int index)
     VrDeviceInfo result = { 0 };
     index = lua_absindex(L, index);
     luaL_argcheck(L, lua_istable(L, index), index, "Expected VrDeviceInfo");
-    lua_getfield(L, index, "hResolution"); result.hResolution = (int)luaL_checkinteger(L, -1); lua_pop(L, 1);
-    lua_getfield(L, index, "vResolution"); result.vResolution = (int)luaL_checkinteger(L, -1); lua_pop(L, 1);
+    lua_getfield(L, index, "hResolution"); result.hResolution = (int)luaL_checknumber(L, -1); lua_pop(L, 1);
+    lua_getfield(L, index, "vResolution"); result.vResolution = (int)luaL_checknumber(L, -1); lua_pop(L, 1);
     lua_getfield(L, index, "hScreenSize"); result.hScreenSize = (float)luaL_checknumber(L, -1); lua_pop(L, 1);
     lua_getfield(L, index, "vScreenSize"); result.vScreenSize = (float)luaL_checknumber(L, -1); lua_pop(L, 1);
     lua_getfield(L, index, "eyeToScreenDistance"); result.eyeToScreenDistance = (float)luaL_checknumber(L, -1); lua_pop(L, 1);
@@ -619,10 +625,10 @@ static void LuaPush_VrDeviceInfo(lua_State *L, VrDeviceInfo info)
 static int lua_Color(lua_State *L)
 {
     LuaPush_Color(L, (Color){
-        (unsigned char)luaL_checkinteger(L, 1),
-        (unsigned char)luaL_checkinteger(L, 2),
-        (unsigned char)luaL_checkinteger(L, 3),
-        (unsigned char)luaL_optinteger(L, 4, 255)
+        (unsigned char)luaL_checknumber(L, 1),
+        (unsigned char)luaL_checknumber(L, 2),
+        (unsigned char)luaL_checknumber(L, 3),
+        (unsigned char)LuaOptInt(L, 4, 255)
     });
     return 1;
 }
@@ -697,7 +703,7 @@ static int lua_Camera(lua_State *L)
     cam.target = LuaGetArgument_Vector3(L, 2);
     cam.up = LuaGetArgument_Vector3(L, 3);
     cam.fovy = (float)luaL_checknumber(L, 4);
-    cam.projection = (int)luaL_optinteger(L, 5, CAMERA_PERSPECTIVE);
+    cam.projection = LuaOptInt(L, 5, CAMERA_PERSPECTIVE);
     LuaPush_Camera(L, cam);
     return 1;
 }
@@ -719,11 +725,11 @@ static int lua_NPatchInfo(lua_State *L)
 {
     NPatchInfo info = { 0 };
     info.source = LuaGetArgument_Rectangle(L, 1);
-    info.left = (int)luaL_checkinteger(L, 2);
-    info.top = (int)luaL_checkinteger(L, 3);
-    info.right = (int)luaL_checkinteger(L, 4);
-    info.bottom = (int)luaL_checkinteger(L, 5);
-    info.layout = (int)luaL_checkinteger(L, 6);
+    info.left = (int)luaL_checknumber(L, 2);
+    info.top = (int)luaL_checknumber(L, 3);
+    info.right = (int)luaL_checknumber(L, 4);
+    info.bottom = (int)luaL_checknumber(L, 5);
+    info.layout = (int)luaL_checknumber(L, 6);
     LuaPush_NPatchInfo(L, info);
     return 1;
 }
@@ -743,7 +749,7 @@ static int lua_Transform(lua_State *L)
 //----------------------------------------------------------------------------------
 static int lua_TraceLog(lua_State *L)
 {
-    int logLevel = (int)luaL_checkinteger(L, 1);
+    int logLevel = (int)luaL_checknumber(L, 1);
     const char *text = luaL_checkstring(L, 2);
     TraceLog(logLevel, "%s", text);
     return 0;
@@ -751,6 +757,31 @@ static int lua_TraceLog(lua_State *L)
 
 static int lua_TextFormat(lua_State *L)
 {
+    const char *fmt = luaL_checkstring(L, 1);
+    int arg = 2;
+    int top = lua_gettop(L);
+
+    for (const char *p = fmt; *p != '\0'; p++)
+    {
+        if (*p != '%') continue;
+        p++;
+        if (*p == '%') continue;
+        while (*p == '#' || *p == '0' || *p == '-' || *p == ' ' || *p == '+') p++;
+        while (*p >= '0' && *p <= '9') p++;
+        if (*p == '.')
+        {
+            p++;
+            while (*p >= '0' && *p <= '9') p++;
+        }
+        if (*p == '\0') break;
+        if (strchr("diouxXc", *p) && arg <= top && lua_isnumber(L, arg))
+        {
+            lua_pushinteger(L, (lua_Integer)lua_tonumber(L, arg));
+            lua_replace(L, arg);
+        }
+        arg++;
+    }
+
     lua_getglobal(L, "string");
     lua_getfield(L, -1, "format");
     lua_remove(L, -2);
@@ -870,8 +901,8 @@ static int lua_UnloadImageColors(lua_State *L) { (void)L; return 0; }
 static int lua_SetShaderValue(lua_State *L)
 {
     Shader shader = LuaGetArgument_Shader(L, 1);
-    int locIndex = (int)luaL_checkinteger(L, 2);
-    int uniformType = (int)luaL_checkinteger(L, 4);
+    int locIndex = (int)luaL_checknumber(L, 2);
+    int uniformType = (int)luaL_checknumber(L, 4);
     float values[4] = { 0 };
     int ivalues[4] = { 0 };
 
@@ -883,14 +914,14 @@ static int lua_SetShaderValue(lua_State *L)
         {
             lua_rawgeti(L, 3, i + 1);
             values[i] = (float)luaL_checknumber(L, -1);
-            ivalues[i] = (int)luaL_checkinteger(L, -1);
+            ivalues[i] = (int)luaL_checknumber(L, -1);
             lua_pop(L, 1);
         }
     }
     else if (lua_isnumber(L, 3))
     {
         values[0] = (float)lua_tonumber(L, 3);
-        ivalues[0] = (int)lua_tointeger(L, 3);
+        ivalues[0] = (int)lua_tonumber(L, 3);
     }
     else luaL_argerror(L, 3, "number or table expected");
 
@@ -910,7 +941,7 @@ static int lua_SetShaderValue(lua_State *L)
 static int lua_UpdateCamera(lua_State *L)
 {
     Camera camera = LuaGetArgument_Camera(L, 1);
-    int mode = (int)luaL_checkinteger(L, 2);
+    int mode = (int)luaL_checknumber(L, 2);
     UpdateCamera(&camera, mode);
     LuaWrite_Camera(L, 1, camera);
     lua_pushvalue(L, 1);
@@ -932,7 +963,7 @@ static int lua_UpdateCameraPro(lua_State *L)
 static int lua_LoadFontEx(lua_State *L)
 {
     const char *fileName = luaL_checkstring(L, 1);
-    int fontSize = (int)luaL_checkinteger(L, 2);
+    int fontSize = (int)luaL_checknumber(L, 2);
     int *codepoints = NULL;
     int codepointCount = 0;
 
@@ -943,7 +974,7 @@ static int lua_LoadFontEx(lua_State *L)
         for (int i = 0; i < codepointCount; i++)
         {
             lua_rawgeti(L, 3, i + 1);
-            codepoints[i] = (int)luaL_checkinteger(L, -1);
+            codepoints[i] = (int)luaL_checknumber(L, -1);
             lua_pop(L, 1);
         }
     }
@@ -1061,7 +1092,7 @@ static int lua_UpdateSound(lua_State *L)
     Sound sound = LuaGetArgument_Sound(L, 1);
     size_t len = 0;
     const char *data = luaL_checklstring(L, 2, &len);
-    int sampleCount = (int)luaL_optinteger(L, 3, (lua_Integer)len);
+    int sampleCount = LuaOptInt(L, 3, (int)len);
     UpdateSound(sound, data, sampleCount);
     return 0;
 }
@@ -1080,7 +1111,7 @@ static int lua_UpdateAudioStream(lua_State *L)
             buf[i] = (float)luaL_checknumber(L, -1);
             lua_pop(L, 1);
         }
-        int frameCount = (int)luaL_optinteger(L, 3, n);
+        int frameCount = LuaOptInt(L, 3, n);
         UpdateAudioStream(stream, buf, frameCount);
         RL_FREE(buf);
         return 0;
@@ -1088,7 +1119,7 @@ static int lua_UpdateAudioStream(lua_State *L)
 
     size_t len = 0;
     const char *data = luaL_checklstring(L, 2, &len);
-    int frameCount = (int)luaL_optinteger(L, 3, (lua_Integer)len);
+    int frameCount = LuaOptInt(L, 3, (int)len);
     UpdateAudioStream(stream, data, frameCount);
     return 0;
 }
@@ -1156,7 +1187,7 @@ static int lua_GetImageData(lua_State *L)
 static int lua_SetModelTexture(lua_State *L)
 {
     Model *model = (Model *)luaL_checkudata(L, 1, "Model");
-    int mapType = (int)luaL_checkinteger(L, 2);
+    int mapType = (int)luaL_checknumber(L, 2);
     Texture2D texture = LuaGetArgument_Texture2D(L, 3);
     luaL_argcheck(L, (model->materialCount > 0) && (model->materials != NULL), 1, "model has no materials");
     SetMaterialTexture(&model->materials[0], mapType, texture);
@@ -1177,7 +1208,7 @@ static int lua_SetModelShader(lua_State *L)
 static int lua_GetModelMesh(lua_State *L)
 {
     Model model = LuaGetArgument_Model(L, 1);
-    int index = (int)luaL_checkinteger(L, 2);
+    int index = (int)luaL_checknumber(L, 2);
     luaL_argcheck(L, (index >= 0) && (index < model.meshCount) && (model.meshes != NULL), 2, "mesh index out of range");
     LuaPush_Mesh(L, model.meshes[index]);
     return 1;

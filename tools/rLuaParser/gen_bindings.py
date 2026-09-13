@@ -214,6 +214,7 @@ ENUM_REGS
 
 RLUADEF void rLuaCloseDevice(void)
 {
+    if (IsWindowReady()) CloseWindow();
     if (mainLuaState)
     {
         lua_close(mainLuaState);
@@ -228,6 +229,7 @@ static void rLuaReportError(int result)
     const char *msg = lua_tostring(L, -1);
     if (result == LUA_ERRMEM) TraceLog(LOG_ERROR, "Lua Memory Error: %s", msg ? msg : "");
     else TraceLog(LOG_ERROR, "Lua Error: %s", msg ? msg : "");
+    if (IsWindowReady()) CloseWindow();
 }
 
 RLUADEF void rLuaExecuteCode(const char *code)
