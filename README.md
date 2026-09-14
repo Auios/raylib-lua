@@ -70,10 +70,11 @@ Lua scripts under [examples](examples) are ports of the matching raylib 6.0 C ex
 Do not edit `src/raylib-lua.h` by hand:
 
 ```
-python tools/rLuaParser/gen_bindings.py
+cmake --build build --target lua
+build/lua tools/rLuaParser/gen_bindings.lua
 ```
 
-That reads `tools/rLuaParser/api/raylib_api.json` (rlparser dump from tag `6.0`), `api/raymath.h`, and the handwritten runtime in `runtime.inl`.
+Any Lua 5.3+ on `PATH` also works (`lua tools/rLuaParser/gen_bindings.lua`). That reads `tools/rLuaParser/api/raylib_api.lua` (from the rlparser dump at tag `6.0`), `api/raymath.h`, and the handwritten runtime in `runtime.inl`. The JSON dump in `api/raylib_api.json` is kept as the original rlparser artifact.
 
 # License
 

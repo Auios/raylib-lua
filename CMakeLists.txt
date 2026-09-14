@@ -46,6 +46,13 @@ list(TRANSFORM LUA_SOURCES PREPEND ${LUA_SRC_DIR}/)
 add_library(lua53 STATIC ${LUA_SOURCES})
 target_include_directories(lua53 PUBLIC ${LUA_SRC_DIR})
 
+# Standalone interpreter for tools/rLuaParser/gen_bindings.lua
+add_executable(lua ${LUA_SRC_DIR}/lua.c)
+target_link_libraries(lua PRIVATE lua53)
+if(UNIX AND NOT APPLE)
+    target_link_libraries(lua PRIVATE m dl)
+endif()
+
 function(rlua_host target source)
     add_executable(${target} ${source})
     target_include_directories(${target} PRIVATE
