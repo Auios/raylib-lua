@@ -1240,9 +1240,14 @@ static int lua_LoadShaderFromMemory(lua_State *L)
 static int lua_GetImageData(lua_State *L)
 {
     Image image = LuaGetArgument_Image(L, 1);
-    int size = GetPixelDataSize(image.width, image.height, image.format);
-    if ((image.data == NULL) || (size <= 0)) lua_pushliteral(L, "");
-    else lua_pushlstring(L, (const char *)image.data, (size_t)size);
+    Color *pixels = LoadImageColors(image);
+    int size = image.width * image.height * (int)sizeof(Color);
+    if ((pixels == NULL) || (size <= 0)) lua_pushliteral(L, "");
+    else
+    {
+        lua_pushlstring(L, (const char *)pixels, (size_t)size);
+        UnloadImageColors(pixels);
+    }
     return 1;
 }
 

@@ -63,7 +63,7 @@ rlualauncher examples/core/core_basic_window.lua
 
 ### Examples
 
-Lua scripts under [examples](examples) are ports of the matching raylib 6.0 C examples that already lived in this tree (not the full 215-example catalog). Enums and colors use C names (`KEY_DOWN`, `PIXELFORMAT_UNCOMPRESSED_R8G8B8A8`). Texture/model/audio/font files are the same assets as the official C examples; copy them from a raylib 6.0 checkout into each example's `resources/` folder.
+Lua scripts under [examples](examples) are ports of the matching raylib 6.0 C examples that already lived in this tree (not the full 215-example catalog). Enums and colors use C names (`KEY_DOWN`, `PIXELFORMAT_UNCOMPRESSED_R8G8B8A8`). A few official assets are vendored (`target.ogg`, `country.mp3`, watermill/turret/castle, `spark_flame.png`, `parrots.png`, plus each folder's `LICENSE.md`). Other texture/model/audio/font files still need to be copied from a raylib 6.0 checkout into each example's `resources/` folder.
 
 ### Regenerating the header
 
