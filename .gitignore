@@ -43,3 +43,6 @@ luac.out
 !src/external/lua/lib/liblua53.a
 !src/external/lua/lib/liblua53dll.a
 !src/external/lua/lib/lua53.dll
+
+# CMake build tree
+/build/

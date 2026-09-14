@@ -1,67 +1,64 @@
 -------------------------------------------------------------------------------------------
 --
---  raylib [models] example - Load and draw a 3d model (OBJ)
+--  raylib [models] example - loading
 --
---  This example has been created using raylib 1.6 (www.raylib.com)
---  raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+--  This example has been created using raylib 6.0 (www.raylib.com)
 --
---  Copyright (c) 2014-2016 Ramon Santamaria (@raysan5)
+--  Copyright (c) 2014-2026 Ramon Santamaria (@raysan5)
 --
 -------------------------------------------------------------------------------------------
 
--- Initialization
--------------------------------------------------------------------------------------------
-local screenWidth = 800
-local screenHeight = 450
+local screenWidth, screenHeight = 800, 450
+InitWindow(screenWidth, screenHeight, "raylib [models] example - loading")
+local camera = Camera(Vector3(50, 50, 50), Vector3(0, 12, 0), Vector3(0, 1, 0), 45.0, CAMERA_PERSPECTIVE)
+local model = LoadModel("resources/models/obj/castle.obj")
+local texture = LoadTexture("resources/models/obj/castle_diffuse.png")
+SetModelTexture(model, MATERIAL_MAP_DIFFUSE, texture)
+local position = Vector3(0, 0, 0)
+local bounds = GetModelBoundingBox(model)
+local selected = false
+SetTargetFPS(60)
 
-InitWindow(screenWidth, screenHeight, "raylib [models] example - obj model loading")
+while not WindowShouldClose() do
+    UpdateCamera(camera, CAMERA_ORBITAL)
+    if IsFileDropped() then
+        local droppedFiles = LoadDroppedFiles()
+        if #droppedFiles == 1 then
+            local path = droppedFiles[1]
+            if IsFileExtension(path, ".obj") or IsFileExtension(path, ".gltf") or IsFileExtension(path, ".glb")
+                or IsFileExtension(path, ".vox") or IsFileExtension(path, ".iqm") or IsFileExtension(path, ".m3d") then
+                UnloadModel(model)
+                model = LoadModel(path)
+                SetModelTexture(model, MATERIAL_MAP_DIFFUSE, texture)
+                bounds = GetModelBoundingBox(model)
+                camera.position.x = bounds.max.x + 10
+                camera.position.y = bounds.max.y + 10
+                camera.position.z = bounds.max.z + 10
+            elseif IsFileExtension(path, ".png") then
+                UnloadTexture(texture)
+                texture = LoadTexture(path)
+                SetModelTexture(model, MATERIAL_MAP_DIFFUSE, texture)
+            end
+        end
+    end
+    if IsMouseButtonPressed(MOUSE_BUTTON_LEFT) then
+        if GetRayCollisionBox(GetScreenToWorldRay(GetMousePosition(), camera), bounds).hit then selected = not selected
+        else selected = false end
+    end
 
--- Define the camera to look into our 3d world
-local camera = Camera(Vector3(3.0, 3.0, 3.0), Vector3(0.0, 1.5, 0.0), Vector3(0.0, 1.0, 0.0), 45.0)
-
-local dwarf = LoadModel("resources/model/dwarf.obj")                -- Load OBJ model
-local texture = LoadTexture("resources/model/dwarf_diffuse.png")    -- Load model texture
-dwarf.material.texDiffuse = texture                                 -- Set dwarf model diffuse texture
-local position = Vector3(0.0, 0.0, 0.0)                             -- Set model position
-
-SetTargetFPS(60)        -- Set our game to run at 60 frames-per-second
--------------------------------------------------------------------------------------------
-
--- Main game loop
-while not WindowShouldClose() do            -- Detect window close button or ESC key
-    -- Update
-    ---------------------------------------------------------------------------------------
-    -- ...
-    ---------------------------------------------------------------------------------------
-
-    -- Draw
-    ---------------------------------------------------------------------------------------
     BeginDrawing()
-
         ClearBackground(RAYWHITE)
-
-        Begin3dMode(camera)
-
-            DrawModel(dwarf, position, 2.0, WHITE)   -- Draw 3d model with texture
-
-            DrawGrid(10, 1.0)         -- Draw a grid
-
-            DrawGizmo(position)        -- Draw gizmo
-
-        End3dMode()
-        
-        DrawText("(c) Dwarf 3D model by David Moreno", screenWidth - 200, screenHeight - 20, 10, GRAY)
-
+        BeginMode3D(camera)
+            DrawModel(model, position, 1.0, WHITE)
+            DrawGrid(20, 10.0)
+            if selected then DrawBoundingBox(bounds, GREEN) end
+        EndMode3D()
+        DrawText("Drag & drop model to load mesh/texture.", 10, GetScreenHeight() - 20, 10, DARKGRAY)
+        if selected then DrawText("MODEL SELECTED", GetScreenWidth() - 110, 10, 10, GREEN) end
+        DrawText("(c) Castle 3D model by Alberto Cano", screenWidth - 200, screenHeight - 20, 10, GRAY)
         DrawFPS(10, 10)
-
     EndDrawing()
-    ---------------------------------------------------------------------------------------
 end
-
--- De-Initialization
--------------------------------------------------------------------------------------------
-UnloadTexture(texture)     -- Unload texture
-UnloadModel(dwarf)         -- Unload model
-
-CloseWindow()              -- Close window and OpenGL context
--------------------------------------------------------------------------------------------
+UnloadTexture(texture)
+UnloadModel(model)
+CloseWindow()

@@ -1,115 +1,48 @@
 -------------------------------------------------------------------------------------------
 --
---  raylib [models] example - Detect basic 3d collisions (box vs sphere vs box)
+--  raylib [models] example - box collisions
 --
---  This example has been created using raylib 1.6 (www.raylib.com)
---  raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+--  This example has been created using raylib 6.0 (www.raylib.com)
 --
---  Copyright (c) 2014-2016 Ramon Santamaria (@raysan5)
+--  Copyright (c) 2014-2026 Ramon Santamaria (@raysan5)
 --
 -------------------------------------------------------------------------------------------
 
--- Initialization
--------------------------------------------------------------------------------------------
-local screenWidth = 800
-local screenHeight = 450
-
+local screenWidth, screenHeight = 800, 450
 InitWindow(screenWidth, screenHeight, "raylib [models] example - box collisions")
+local camera = Camera(Vector3(0, 10, 10), Vector3(0, 0, 0), Vector3(0, 1, 0), 45.0)
+local playerPosition, playerSize, playerColor = Vector3(0, 1, 2), Vector3(1, 2, 1), GREEN
+local enemyBoxPos, enemyBoxSize = Vector3(-4, 1, 0), Vector3(2, 2, 2)
+local enemySpherePos, enemySphereSize = Vector3(4, 0, 0), 1.5
+SetTargetFPS(60)
 
--- Define the camera to look into our 3d world
-local camera = Camera(Vector3(0.0, 10.0, 10.0), Vector3(0.0, 0.0, 0.0), Vector3(0.0, 1.0, 0.0), 45.0)
+while not WindowShouldClose() do
+    if IsKeyDown(KEY_RIGHT) then playerPosition.x = playerPosition.x + 0.2
+    elseif IsKeyDown(KEY_LEFT) then playerPosition.x = playerPosition.x - 0.2
+    elseif IsKeyDown(KEY_DOWN) then playerPosition.z = playerPosition.z + 0.2
+    elseif IsKeyDown(KEY_UP) then playerPosition.z = playerPosition.z - 0.2 end
 
-local playerPosition = Vector3(0.0, 1.0, 2.0)
-local playerSize = Vector3(1.0, 2.0, 1.0)
-local playerColor = GREEN
+    local playerBox = BoundingBox(
+        Vector3(playerPosition.x - playerSize.x/2, playerPosition.y - playerSize.y/2, playerPosition.z - playerSize.z/2),
+        Vector3(playerPosition.x + playerSize.x/2, playerPosition.y + playerSize.y/2, playerPosition.z + playerSize.z/2))
+    local enemyBox = BoundingBox(
+        Vector3(enemyBoxPos.x - enemyBoxSize.x/2, enemyBoxPos.y - enemyBoxSize.y/2, enemyBoxPos.z - enemyBoxSize.z/2),
+        Vector3(enemyBoxPos.x + enemyBoxSize.x/2, enemyBoxPos.y + enemyBoxSize.y/2, enemyBoxPos.z + enemyBoxSize.z/2))
+    local collision = CheckCollisionBoxes(playerBox, enemyBox) or CheckCollisionBoxSphere(playerBox, enemySpherePos, enemySphereSize)
+    playerColor = collision and RED or GREEN
 
-local enemyBoxPos = Vector3(-4.0, 1.0, 0.0)
-local enemyBoxSize = Vector3(2.0, 2.0, 2.0)
-
-local enemySpherePos = Vector3(4.0, 0.0, 0.0)
-local enemySphereSize = 1.5
-
-local collision = false
-
-SetTargetFPS(60)   -- Set our game to run at 60 frames-per-second
--------------------------------------------------------------------------------------------
-
--- Main game loop
-while not WindowShouldClose() do            -- Detect window close button or ESC key
-    -- Update
-    ---------------------------------------------------------------------------------------
-    
-    -- Move player
-    if (IsKeyDown(KEY.RIGHT)) then playerPosition.x = playerPosition.x + 0.2
-    elseif (IsKeyDown(KEY.LEFT)) then playerPosition.x = playerPosition.x - 0.2
-    elseif (IsKeyDown(KEY.DOWN)) then playerPosition.z = playerPosition.z + 0.2
-    elseif (IsKeyDown(KEY.UP)) then playerPosition.z = playerPosition.z - 0.2 end
-    
-    collision = false
-    
-    -- Check collisions player vs enemy-box
-    if (CheckCollisionBoxes(
-        BoundingBox(Vector3(playerPosition.x - playerSize.x/2, 
-                            playerPosition.y - playerSize.y/2, 
-                            playerPosition.z - playerSize.z/2), 
-                    Vector3(playerPosition.x + playerSize.x/2,
-                            playerPosition.y + playerSize.y/2, 
-                            playerPosition.z + playerSize.z/2)),
-        BoundingBox(Vector3(enemyBoxPos.x - enemyBoxSize.x/2, 
-                            enemyBoxPos.y - enemyBoxSize.y/2, 
-                            enemyBoxPos.z - enemyBoxSize.z/2), 
-                    Vector3(enemyBoxPos.x + enemyBoxSize.x/2,
-                            enemyBoxPos.y + enemyBoxSize.y/2, 
-                            enemyBoxPos.z + enemyBoxSize.z/2)))) then collision = true 
-    end
-    
-    -- Check collisions player vs enemy-sphere
-    if (CheckCollisionBoxSphere(
-        BoundingBox(Vector3(playerPosition.x - playerSize.x/2, 
-                            playerPosition.y - playerSize.y/2, 
-                            playerPosition.z - playerSize.z/2), 
-                    Vector3(playerPosition.x + playerSize.x/2,
-                            playerPosition.y + playerSize.y/2, 
-                            playerPosition.z + playerSize.z/2)), 
-        enemySpherePos, enemySphereSize)) then collision = true
-    end
-    
-    if (collision) then playerColor = RED
-    else playerColor = GREEN end
-    ---------------------------------------------------------------------------------------
-
-    -- Draw
-    ---------------------------------------------------------------------------------------
     BeginDrawing()
-
         ClearBackground(RAYWHITE)
-
-        Begin3dMode(camera)
-
-            -- Draw enemy-box
+        BeginMode3D(camera)
             DrawCube(enemyBoxPos, enemyBoxSize.x, enemyBoxSize.y, enemyBoxSize.z, GRAY)
             DrawCubeWires(enemyBoxPos, enemyBoxSize.x, enemyBoxSize.y, enemyBoxSize.z, DARKGRAY)
-            
-            -- Draw enemy-sphere
             DrawSphere(enemySpherePos, enemySphereSize, GRAY)
             DrawSphereWires(enemySpherePos, enemySphereSize, 16, 16, DARKGRAY)
-            
-            -- Draw player
             DrawCubeV(playerPosition, playerSize, playerColor)
-
-            DrawGrid(10, 1.0)        -- Draw a grid
-
-        End3dMode()
-        
-        DrawText("Move player with cursors to collide", 220, 40, 20, GRAY)
-
+            DrawGrid(10, 1.0)
+        EndMode3D()
+        DrawText("Move player with arrow keys to collide", 220, 40, 20, GRAY)
         DrawFPS(10, 10)
-
     EndDrawing()
-    ---------------------------------------------------------------------------------------
 end
-
--- De-Initialization
--------------------------------------------------------------------------------------------
-CloseWindow()        -- Close window and OpenGL context
--------------------------------------------------------------------------------------------
+CloseWindow()

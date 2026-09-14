@@ -1,50 +1,35 @@
 -------------------------------------------------------------------------------------------
 --
---  raylib [core] examples - Mouse wheel
+--  raylib [core] example - Mouse wheel input
 --
---  This example has been created using raylib 1.6 (www.raylib.com)
---  raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+--  This example has been created using raylib 6.0 (www.raylib.com)
 --
---  Copyright (c) 2014-2016 Ramon Santamaria (@raysan5)
+--  Copyright (c) 2014-2026 Ramon Santamaria (@raysan5)
 --
 -------------------------------------------------------------------------------------------
 
--- Initialization
--------------------------------------------------------------------------------------------
 local screenWidth = 800
 local screenHeight = 450
 
-InitWindow(screenWidth, screenHeight, "raylib [core] example - mouse wheel")
+InitWindow(screenWidth, screenHeight, "raylib [core] example - input mouse wheel")
 
 local boxPositionY = screenHeight/2 - 40
-local scrollSpeed = 4               -- Scrolling speed in pixels
+local scrollSpeed = 4
 
-SetTargetFPS(60)                    -- Set target frames-per-second
-----------------------------------------------------------------------------------------
+SetTargetFPS(60)
 
--- Main game loop
-while not WindowShouldClose() do    -- Detect window close button or ESC key
-    -- Update
-    ------------------------------------------------------------------------------------
+while not WindowShouldClose() do
     boxPositionY = boxPositionY - (GetMouseWheelMove()*scrollSpeed)
-    ------------------------------------------------------------------------------------
 
-    -- Draw
-    ------------------------------------------------------------------------------------
     BeginDrawing()
 
         ClearBackground(RAYWHITE)
 
         DrawRectangle(screenWidth/2 - 40, boxPositionY, 80, 80, MAROON)
-
         DrawText("Use mouse wheel to move the cube up and down!", 10, 10, 20, GRAY)
-        DrawText(string.format("Box position Y: %03i", boxPositionY), 10, 40, 20, LIGHTGRAY)
+        DrawText(TextFormat("Box position Y: %03i", boxPositionY), 10, 40, 20, LIGHTGRAY)
 
     EndDrawing()
-    ------------------------------------------------------------------------------------
 end
 
--- De-Initialization
-----------------------------------------------------------------------------------------
-CloseWindow()        -- Close window and OpenGL context
-----------------------------------------------------------------------------------------
+CloseWindow()

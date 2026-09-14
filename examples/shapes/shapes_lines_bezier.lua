@@ -1,51 +1,32 @@
 -------------------------------------------------------------------------------------------
---
---   raylib [shapes] example - Cubic-bezier lines
---
---  This example has been created using raylib 1.7 (www.raylib.com)
---  raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
---
---  Copyright (c) 2014-2017 Ramon Santamaria (@raysan5)
---
+--  raylib [shapes] example - Cubic-bezier lines
+--  This example has been created using raylib 6.0 (www.raylib.com)
 -------------------------------------------------------------------------------------------
-
--- Initialization
--------------------------------------------------------------------------------------------
-local screenWidth = 800
-local screenHeight = 450
-
-SetConfigFlags(FLAG.MSAA_4X_HINT);
-InitWindow(screenWidth, screenHeight, "raylib [shapes] example - cubic-bezier lines")
-
-local startPoint = Vector2(0, 0)
-local endPoint = Vector2(screenWidth, screenHeight)
-
-SetTargetFPS(60)       -- Set target frames-per-second
--------------------------------------------------------------------------------------------
-
--- Main game loop
-while not WindowShouldClose() do            -- Detect window close button or ESC key
-    -- Update
-    ---------------------------------------------------------------------------------------
-    if (IsMouseButtonDown(MOUSE.LEFT_BUTTON)) then startPoint = GetMousePosition()
-    elseif (IsMouseButtonDown(MOUSE.RIGHT_BUTTON)) then endPoint = GetMousePosition() end
-    ---------------------------------------------------------------------------------------
-
-    -- Draw
-    ---------------------------------------------------------------------------------------
+local screenWidth, screenHeight = 800, 450
+SetConfigFlags(FLAG_MSAA_4X_HINT)
+InitWindow(screenWidth, screenHeight, "raylib [shapes] example - lines bezier")
+local startPoint = Vector2(30, 30)
+local endPoint = Vector2(screenWidth - 30, screenHeight - 30)
+local moveStartPoint, moveEndPoint = false, false
+SetTargetFPS(60)
+while not WindowShouldClose() do
+    local mouse = GetMousePosition()
+    if CheckCollisionPointCircle(mouse, startPoint, 10.0) and IsMouseButtonDown(MOUSE_BUTTON_LEFT) then moveStartPoint = true
+    elseif CheckCollisionPointCircle(mouse, endPoint, 10.0) and IsMouseButtonDown(MOUSE_BUTTON_LEFT) then moveEndPoint = true end
+    if moveStartPoint then
+        startPoint = mouse
+        if IsMouseButtonReleased(MOUSE_BUTTON_LEFT) then moveStartPoint = false end
+    end
+    if moveEndPoint then
+        endPoint = mouse
+        if IsMouseButtonReleased(MOUSE_BUTTON_LEFT) then moveEndPoint = false end
+    end
     BeginDrawing()
-
         ClearBackground(RAYWHITE)
-
-        DrawText("USE MOUSE LEFT-RIGHT CLICK to DEFINE LINE START and END POINTS", 15, 20, 20, GRAY)
-
-        DrawLineBezier(startPoint, endPoint, 2.0, RED)
-
+        DrawText("MOVE START-END POINTS WITH MOUSE", 15, 20, 20, GRAY)
+        DrawLineBezier(startPoint, endPoint, 4.0, BLUE)
+        DrawCircleV(startPoint, CheckCollisionPointCircle(mouse, startPoint, 10.0) and 14.0 or 8.0, moveStartPoint and RED or BLUE)
+        DrawCircleV(endPoint, CheckCollisionPointCircle(mouse, endPoint, 10.0) and 14.0 or 8.0, moveEndPoint and RED or BLUE)
     EndDrawing()
-    ---------------------------------------------------------------------------------------
 end
-
--- De-Initialization
--------------------------------------------------------------------------------------------
-CloseWindow()        -- Close window and OpenGL context
--------------------------------------------------------------------------------------------
+CloseWindow()
