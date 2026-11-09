@@ -2,53 +2,50 @@
 --
 --  raylib [core] example - Mouse input
 --
---  This example has been created using raylib 1.6 (www.raylib.com)
---  raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+--  This example has been created using raylib 6.0 (www.raylib.com)
 --
---  Copyright (c) 2014-2016 Ramon Santamaria (@raysan5)
+--  Copyright (c) 2014-2026 Ramon Santamaria (@raysan5)
 --
 -------------------------------------------------------------------------------------------
 
--- Initialization
--------------------------------------------------------------------------------------------
 local screenWidth = 800
 local screenHeight = 450
 
-InitWindow(screenWidth, screenHeight, "raylib [core] example - mouse input")
+InitWindow(screenWidth, screenHeight, "raylib [core] example - input mouse")
 
 local ballPosition = Vector2(-100.0, -100.0)
 local ballColor = DARKBLUE
 
-SetTargetFPS(60)                    -- Set target frames-per-second
------------------------------------------------------------------------------------------
+SetTargetFPS(60)
 
--- Main game loop
-while not WindowShouldClose() do    -- Detect window close button or ESC key
-    -- Update
-    ------------------------------------------------------------------------------------
-    ballPosition = GetMousePosition()
-    
-    if (IsMouseButtonPressed(MOUSE.LEFT_BUTTON)) then ballColor = MAROON
-    elseif (IsMouseButtonPressed(MOUSE.MIDDLE_BUTTON)) then ballColor = LIME
-    elseif (IsMouseButtonPressed(MOUSE.RIGHT_BUTTON)) then ballColor = DARKBLUE
+while not WindowShouldClose() do
+    if IsKeyPressed(KEY_H) then
+        if IsCursorHidden() then ShowCursor() else HideCursor() end
     end
-    ------------------------------------------------------------------------------------
 
-    -- Draw
-    ------------------------------------------------------------------------------------
+    ballPosition = GetMousePosition()
+
+    if IsMouseButtonPressed(MOUSE_BUTTON_LEFT) then ballColor = MAROON
+    elseif IsMouseButtonPressed(MOUSE_BUTTON_MIDDLE) then ballColor = LIME
+    elseif IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) then ballColor = DARKBLUE
+    elseif IsMouseButtonPressed(MOUSE_BUTTON_SIDE) then ballColor = PURPLE
+    elseif IsMouseButtonPressed(MOUSE_BUTTON_EXTRA) then ballColor = YELLOW
+    elseif IsMouseButtonPressed(MOUSE_BUTTON_FORWARD) then ballColor = ORANGE
+    elseif IsMouseButtonPressed(MOUSE_BUTTON_BACK) then ballColor = BEIGE
+    end
+
     BeginDrawing()
 
         ClearBackground(RAYWHITE)
 
         DrawCircleV(ballPosition, 40, ballColor)
-
         DrawText("move ball with mouse and click mouse button to change color", 10, 10, 20, DARKGRAY)
+        DrawText("Press 'H' to toggle cursor visibility", 10, 30, 20, DARKGRAY)
+
+        if IsCursorHidden() then DrawText("CURSOR HIDDEN", 20, 60, 20, RED)
+        else DrawText("CURSOR VISIBLE", 20, 60, 20, LIME) end
 
     EndDrawing()
-    ------------------------------------------------------------------------------------
 end
 
--- De-Initialization
-----------------------------------------------------------------------------------------
-CloseWindow()        -- Close window and OpenGL context
-----------------------------------------------------------------------------------------
+CloseWindow()

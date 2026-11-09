@@ -1,97 +1,62 @@
 -------------------------------------------------------------------------------------------
 --
---  raylib [audio] example - Raw audio streaming
+--  raylib [audio] example - raw stream
 --
---  NOTE: This example requires OpenAL Soft library installed
+--  This example has been created using raylib 6.0 (www.raylib.com)
 --
---  This example has been created using raylib 1.6 (www.raylib.com)
---  raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
---
---  Copyright (c) 2014-2016 Ramon Santamaria (@raysan5)
+--  Copyright (c) 2014-2026 Ramon Santamaria (@raysan5)
 --
 -------------------------------------------------------------------------------------------
 
-MAX_SAMPLES = 20000
-DEG2RAD = math.pi/180.0
-
--- Initialization
--------------------------------------------------------------------------------------------
-local screenWidth = 800
-local screenHeight = 450
-
-InitWindow(screenWidth, screenHeight, "raylib [audio] example - raw audio streaming")
-
-InitAudioDevice()              -- Initialize audio device
-
--- Init raw audio stream (sample rate: 22050, sample size: 32bit-float, channels: 1-mono)
-local stream = InitAudioStream(22050, 32, 1)
-
--- Fill audio stream with some samples (sine wave)
-local data = {}
-
-for i = 1, MAX_SAMPLES do
-    data[i] = math.sin(((2*math.pi*i)/2)*DEG2RAD)
-end
-
--- NOTE: The generated MAX_SAMPLES do not fit to close a perfect loop
--- for that reason, there is a clip everytime audio stream is looped
-
+local BUFFER_SIZE, SAMPLE_RATE = 4096, 44100
+local screenWidth, screenHeight = 800, 450
+InitWindow(screenWidth, screenHeight, "raylib [audio] example - raw stream")
+InitAudioDevice()
+SetAudioStreamBufferSizeDefault(BUFFER_SIZE)
+local stream = LoadAudioStream(SAMPLE_RATE, 32, 1)
+local pan = 0.0
+SetAudioStreamPan(stream, pan)
 PlayAudioStream(stream)
+local sineFrequency, newSineFrequency, sineIndex, sineStartTime = 440, 440, 0, 0.0
+SetTargetFPS(30)
 
-local totalSamples = MAX_SAMPLES
-local samplesLeft = totalSamples
+while not WindowShouldClose() do
+    if IsKeyDown(KEY_UP) then newSineFrequency = newSineFrequency + 10; if newSineFrequency > 12500 then newSineFrequency = 12500 end end
+    if IsKeyDown(KEY_DOWN) then newSineFrequency = newSineFrequency - 10; if newSineFrequency < 20 then newSineFrequency = 20 end end
+    if IsKeyDown(KEY_LEFT) then pan = pan - 0.01; if pan < -1 then pan = -1 end; SetAudioStreamPan(stream, pan) end
+    if IsKeyDown(KEY_RIGHT) then pan = pan + 0.01; if pan > 1 then pan = 1 end; SetAudioStreamPan(stream, pan) end
 
-local position = Vector2(0, 0)
-
-SetTargetFPS(30)               -- Set our game to run at 30 frames-per-second
--------------------------------------------------------------------------------------------
-
--- Main game loop
-while not WindowShouldClose() do    -- Detect window close button or ESC key
-    -- Update
-    ---------------------------------------------------------------------------------------
-    
-    -- Refill audio stream if required
-    if (IsAudioBufferProcessed(stream)) then
-        local numSamples = 0
-        
-        if (samplesLeft >= 4096) then numSamples = 4096
-        else numSamples = samplesLeft end
-
-        UpdateAudioStream(stream, data + (totalSamples - samplesLeft), numSamples)
-        
-        samplesLeft = samplesLeft - numSamples
-        
-        -- Reset samples feeding (loop audio)
-        if (samplesLeft <= 0) then samplesLeft = totalSamples end
-    end
-    ---------------------------------------------------------------------------------------
-
-    -- Draw
-    ---------------------------------------------------------------------------------------
-    BeginDrawing()
-
-        ClearBackground(RAYWHITE)
-
-        DrawText("SINE WAVE SHOULD BE PLAYING!", 240, 140, 20, LIGHTGRAY)
-        
-        -- NOTE: Draw a part of the sine wave (only screen width)
-        for i = 1, GetScreenWidth() do
-            position.x = (i - 1)
-            position.y = 250 + 50*data[i]
-            
-            DrawPixelV(position, RED)
+    if IsAudioStreamProcessed(stream) then
+        local buffer = {}
+        for i = 1, BUFFER_SIZE do
+            local wavelength = SAMPLE_RATE // sineFrequency
+            buffer[i] = math.sin(2*PI*sineIndex/wavelength)
+            sineIndex = sineIndex + 1
+            if sineIndex >= wavelength then
+                sineFrequency = newSineFrequency
+                sineIndex = 0
+                sineStartTime = GetTime()
+            end
         end
+        UpdateAudioStream(stream, buffer, BUFFER_SIZE)
+    end
 
+    BeginDrawing()
+        ClearBackground(RAYWHITE)
+        DrawText(TextFormat("sine frequency: %i", sineFrequency), screenWidth - 220, 10, 20, RED)
+        DrawText(TextFormat("pan: %.2f", pan), screenWidth - 220, 30, 20, RED)
+        DrawText("Up/down to change frequency", 10, 10, 20, DARKGRAY)
+        DrawText("Left/right to pan", 10, 30, 20, DARKGRAY)
+        local windowStart = (GetTime() - sineStartTime)*SAMPLE_RATE
+        local windowSize = math.floor(0.1*SAMPLE_RATE)
+        local wavelength = SAMPLE_RATE // sineFrequency
+        for i = 0, screenWidth - 1 do
+            local t0 = windowStart + i*windowSize/screenWidth
+            local t1 = windowStart + (i + 1)*windowSize/screenWidth
+            DrawLineV(Vector2(i, 250 + 50*math.sin(2*PI*t0/wavelength)), Vector2(i + 1, 250 + 50*math.sin(2*PI*t1/wavelength)), RED)
+        end
     EndDrawing()
-    ---------------------------------------------------------------------------------------
 end
-
--- De-Initialization
--------------------------------------------------------------------------------------------
-CloseAudioStream(stream)   -- Close raw audio stream and delete buffers from RAM
-
-CloseAudioDevice()         -- Close audio device (music streaming is automatically stopped)
-
-CloseWindow()              -- Close window and OpenGL context
--------------------------------------------------------------------------------------------
+UnloadAudioStream(stream)
+CloseAudioDevice()
+CloseWindow()

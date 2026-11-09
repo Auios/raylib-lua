@@ -1,36 +1,24 @@
 /*******************************************************************************************
 *
-*   raylib [rlua] examples test suite
+*   raylib-lua basic host
 *
-*   NOTE: This example requires Lua library (http://luabinaries.sourceforge.net/download.html)
+*   Compile with CMake, or:
+*   gcc -o basic.exe basic.c -I../src -I../src/external/lua/include \
+*       -L../src/external/lua/lib -lraylib -llua53 -lopengl32 -lgdi32 -lwinmm -std=c99
 *
-*   Compile example using:
-*   gcc -o rlua_tester.exe rlua_tester.c -s ../src/rlua_icon                /
-*       -I../src -I../src/external/lua/include -L../src/external/lua/lib    /
-*       -lraylib -lglfw3 -lopengl32 -lgdi32 -lopenal32 -lwinmm -llua53 -lpthread -static     /
-*       -std=c99 -Wl,-allow-multiple-definition -Wl,--subsystem,windows
-*
-*   This example has been created using raylib 1.7 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
-*   Copyright (c) 2016-2017 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2016-2026 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
 #include "raylib.h"
 
 #define RLUA_IMPLEMENTATION
-#include "raylib-lua.h"         // raylib Lua binding
+#include "raylib-lua.h"
 
-int main()
+int main(void)
 {
-    //--------------------------------------------------------------------------------------
-    InitLuaDevice();            // Init Lua device and resources
-
-    ExecuteLuaFile("core_basic_window.lua");
-
-    CloseLuaDevice();           // Close Lua device and free resources
-    //--------------------------------------------------------------------------------------
-
+    rLuaInitDevice();
+    rLuaExecuteFile("core/core_basic_window.lua");
+    rLuaCloseDevice();
     return 0;
 }

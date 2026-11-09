@@ -1,89 +1,53 @@
 -------------------------------------------------------------------------------------------
 --
---  raylib [shapes] example - Draw raylib custom color palette
+--  raylib [shapes] example - colors palette
 --
---  This example has been created using raylib 1.6 (www.raylib.com)
---  raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+--  This example has been created using raylib 6.0 (www.raylib.com)
 --
---  Copyright (c) 2014-2016 Ramon Santamaria (@raysan5)
+--  Copyright (c) 2014-2026 Ramon Santamaria (@raysan5)
 --
 -------------------------------------------------------------------------------------------
 
--- Initialization
--------------------------------------------------------------------------------------------
-local screenWidth = 800
-local screenHeight = 450
+local MAX_COLORS_COUNT = 21
+local screenWidth, screenHeight = 800, 450
+InitWindow(screenWidth, screenHeight, "raylib [shapes] example - colors palette")
 
-InitWindow(screenWidth, screenHeight, "raylib [shapes] example - raylib color palette")
-
-SetTargetFPS(60)       -- Set target frames-per-second
--------------------------------------------------------------------------------------------
-
--- Main game loop
-while not WindowShouldClose() do            -- Detect window close button or ESC key
-    -- Update
-    ---------------------------------------------------------------------------------------
-    -- TODO: Update your variables here
-    ---------------------------------------------------------------------------------------
-
-    -- Draw
-    ---------------------------------------------------------------------------------------
-    BeginDrawing()
-
-        ClearBackground(RAYWHITE)
-
-        DrawText("raylib color palette", 28, 42, 20, BLACK)
-
-        DrawRectangle(26, 80, 100, 100, DARKGRAY)
-        DrawRectangle(26, 188, 100, 100, GRAY)
-        DrawRectangle(26, 296, 100, 100, LIGHTGRAY)
-        DrawRectangle(134, 80, 100, 100, MAROON)
-        DrawRectangle(134, 188, 100, 100, RED)
-        DrawRectangle(134, 296, 100, 100, PINK)
-        DrawRectangle(242, 80, 100, 100, ORANGE)
-        DrawRectangle(242, 188, 100, 100, GOLD)
-        DrawRectangle(242, 296, 100, 100, YELLOW)
-        DrawRectangle(350, 80, 100, 100, DARKGREEN)
-        DrawRectangle(350, 188, 100, 100, LIME)
-        DrawRectangle(350, 296, 100, 100, GREEN)
-        DrawRectangle(458, 80, 100, 100, DARKBLUE)
-        DrawRectangle(458, 188, 100, 100, BLUE)
-        DrawRectangle(458, 296, 100, 100, SKYBLUE)
-        DrawRectangle(566, 80, 100, 100, DARKPURPLE)
-        DrawRectangle(566, 188, 100, 100, VIOLET)
-        DrawRectangle(566, 296, 100, 100, PURPLE)
-        DrawRectangle(674, 80, 100, 100, DARKBROWN)
-        DrawRectangle(674, 188, 100, 100, BROWN)
-        DrawRectangle(674, 296, 100, 100, BEIGE)
-
-
-        DrawText("DARKGRAY", 65, 166, 10, BLACK)
-        DrawText("GRAY", 93, 274, 10, BLACK)
-        DrawText("LIGHTGRAY", 61, 382, 10, BLACK)
-        DrawText("MAROON", 186, 166, 10, BLACK)
-        DrawText("RED", 208, 274, 10, BLACK)
-        DrawText("PINK", 204, 382, 10, BLACK)
-        DrawText("ORANGE", 295, 166, 10, BLACK)
-        DrawText("GOLD", 310, 274, 10, BLACK)
-        DrawText("YELLOW", 300, 382, 10, BLACK)
-        DrawText("DARKGREEN", 382, 166, 10, BLACK)
-        DrawText("LIME", 420, 274, 10, BLACK)
-        DrawText("GREEN", 410, 382, 10, BLACK)
-        DrawText("DARKBLUE", 498, 166, 10, BLACK)
-        DrawText("BLUE", 526, 274, 10, BLACK)
-        DrawText("SKYBLUE", 505, 382, 10, BLACK)
-        DrawText("DARKPURPLE", 592, 166, 10, BLACK)
-        DrawText("VIOLET", 621, 274, 10, BLACK)
-        DrawText("PURPLE", 620, 382, 10, BLACK)
-        DrawText("DARKBROWN", 705, 166, 10, BLACK)
-        DrawText("BROWN", 733, 274, 10, BLACK)
-        DrawText("BEIGE", 737, 382, 10, BLACK)
-
-    EndDrawing()
-    ---------------------------------------------------------------------------------------
+local colors = {
+    DARKGRAY, MAROON, ORANGE, DARKGREEN, DARKBLUE, DARKPURPLE, DARKBROWN,
+    GRAY, RED, GOLD, LIME, BLUE, VIOLET, BROWN, LIGHTGRAY, PINK, YELLOW,
+    GREEN, SKYBLUE, PURPLE, BEIGE
+}
+local colorNames = {
+    "DARKGRAY", "MAROON", "ORANGE", "DARKGREEN", "DARKBLUE", "DARKPURPLE",
+    "DARKBROWN", "GRAY", "RED", "GOLD", "LIME", "BLUE", "VIOLET", "BROWN",
+    "LIGHTGRAY", "PINK", "YELLOW", "GREEN", "SKYBLUE", "PURPLE", "BEIGE"
+}
+local colorsRecs, colorState = {}, {}
+for i = 0, MAX_COLORS_COUNT - 1 do
+    colorsRecs[i] = Rectangle(20 + 100*(i % 7) + 10*(i % 7), 80 + 100*(i // 7) + 10*(i / 7), 100, 100)
+    colorState[i] = 0
 end
+SetTargetFPS(60)
 
--- De-Initialization
--------------------------------------------------------------------------------------------
-CloseWindow()        -- Close window and OpenGL context
--------------------------------------------------------------------------------------------
+while not WindowShouldClose() do
+    local mousePoint = GetMousePosition()
+    for i = 0, MAX_COLORS_COUNT - 1 do
+        if CheckCollisionPointRec(mousePoint, colorsRecs[i]) then colorState[i] = 1 else colorState[i] = 0 end
+    end
+
+    BeginDrawing()
+        ClearBackground(RAYWHITE)
+        DrawText("raylib colors palette", 28, 42, 20, BLACK)
+        DrawText("press SPACE to see all colors", GetScreenWidth() - 180, GetScreenHeight() - 40, 10, GRAY)
+        for i = 0, MAX_COLORS_COUNT - 1 do
+            DrawRectangleRec(colorsRecs[i], Fade(colors[i + 1], colorState[i] ~= 0 and 0.6 or 1.0))
+            if IsKeyDown(KEY_SPACE) or colorState[i] ~= 0 then
+                DrawRectangle(colorsRecs[i].x, colorsRecs[i].y + colorsRecs[i].height - 26, colorsRecs[i].width, 20, BLACK)
+                DrawRectangleLinesEx(colorsRecs[i], 6, Fade(BLACK, 0.3))
+                DrawText(colorNames[i + 1], colorsRecs[i].x + colorsRecs[i].width - MeasureText(colorNames[i + 1], 10) - 12,
+                    colorsRecs[i].y + colorsRecs[i].height - 20, 10, colors[i + 1])
+            end
+        end
+    EndDrawing()
+end
+CloseWindow()

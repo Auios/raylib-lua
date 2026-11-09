@@ -1,64 +1,28 @@
 -------------------------------------------------------------------------------------------
---
---  raylib [shapes] example - Draw basic shapes 2d (rectangle, circle, line...)
---
---  This example has been created using raylib 1.6 (www.raylib.com)
---  raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
---
---  Copyright (c) 2014-2016 Ramon Santamaria (@raysan5)
---
+--  raylib [shapes] example - Basic shapes drawing
+--  This example has been created using raylib 6.0 (www.raylib.com)
 -------------------------------------------------------------------------------------------
-
--- Initialization
--------------------------------------------------------------------------------------------
-local screenWidth = 800
-local screenHeight = 450
-
-InitWindow(screenWidth, screenHeight, "raylib [shapes] example - basic shapes drawing")
-
-SetTargetFPS(60)       -- Set target frames-per-second
--------------------------------------------------------------------------------------------
-
--- Main game loop
-while not WindowShouldClose() do            -- Detect window close button or ESC key
-    -- Update
-    ---------------------------------------------------------------------------------------
-    -- TODO: Update your variables here
-    ---------------------------------------------------------------------------------------
-
-    -- Draw
-    ---------------------------------------------------------------------------------------
+local screenWidth, screenHeight = 800, 450
+InitWindow(screenWidth, screenHeight, "raylib [shapes] example - basic shapes")
+local rotation = 0.0
+SetTargetFPS(60)
+while not WindowShouldClose() do
+    rotation = rotation + 0.2
     BeginDrawing()
-
         ClearBackground(RAYWHITE)
-
         DrawText("some basic shapes available on raylib", 20, 20, 20, DARKGRAY)
-
-        DrawLine(18, 42, screenWidth - 18, 42, BLACK)
-
-        DrawCircle(screenWidth/4, 120, 35, DARKBLUE)
-        DrawCircleGradient(screenWidth/4, 220, 60, GREEN, SKYBLUE)
-        DrawCircleLines(screenWidth/4, 340, 80, DARKBLUE)
-
+        DrawCircle(screenWidth/5, 120, 35, DARKBLUE)
+        DrawCircleGradient(Vector2(screenWidth/5.0, 220.0), 60, GREEN, SKYBLUE)
+        DrawCircleLines(screenWidth/5, 340, 80, DARKBLUE)
         DrawRectangle(screenWidth/4*2 - 60, 100, 120, 60, RED)
-        DrawRectangleGradient(screenWidth/4*2 - 90, 170, 180, 130, MAROON, GOLD)
+        DrawRectangleGradientH(screenWidth/4*2 - 90, 170, 180, 130, MAROON, GOLD)
         DrawRectangleLines(screenWidth/4*2 - 40, 320, 80, 60, ORANGE)
-
-        DrawTriangle(Vector2(screenWidth/4*3, 80),
-                     Vector2(screenWidth/4*3 - 60, 150),
-                     Vector2(screenWidth/4*3 + 60, 150), VIOLET)
-
-        DrawTriangleLines(Vector2(screenWidth/4*3, 160),
-                          Vector2(screenWidth/4*3 - 20, 230),
-                          Vector2(screenWidth/4*3 + 20, 230), DARKBLUE)
-
-        DrawPoly(Vector2(screenWidth/4*3, 320), 6, 80, 0, BROWN)
-
+        DrawTriangle(Vector2(screenWidth/4.0*3.0, 80.0), Vector2(screenWidth/4.0*3.0 - 60.0, 150.0), Vector2(screenWidth/4.0*3.0 + 60.0, 150.0), VIOLET)
+        DrawTriangleLines(Vector2(screenWidth/4.0*3.0, 160.0), Vector2(screenWidth/4.0*3.0 - 20.0, 230.0), Vector2(screenWidth/4.0*3.0 + 20.0, 230.0), DARKBLUE)
+        DrawPoly(Vector2(screenWidth/4.0*3, 330), 6, 80, rotation, BROWN)
+        DrawPolyLines(Vector2(screenWidth/4.0*3, 330), 6, 90, rotation, BROWN)
+        DrawPolyLinesEx(Vector2(screenWidth/4.0*3, 330), 6, 85, rotation, 6, BEIGE)
+        DrawLine(18, 42, screenWidth - 18, 42, BLACK)
     EndDrawing()
-    ---------------------------------------------------------------------------------------
 end
-
--- De-Initialization
--------------------------------------------------------------------------------------------
-CloseWindow()        -- Close window and OpenGL context
--------------------------------------------------------------------------------------------
+CloseWindow()
